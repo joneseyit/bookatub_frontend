@@ -5,20 +5,20 @@ const usersUrl = `${baseUrl}users`
 
 let currentListings
 
-let listingUl = document.getElementById('listings')
+let listingList = document.getElementById('list-o-cards')
 
 document.addEventListener('DOMContentLoaded', () => {
   fetch(listingsUrl)
     .then(response => response.json())
     .then(json => renderHomepage(json))
 
-  listingUl.addEventListener('click', function(e){
-    //we need to render listing page with id of e.target.dataset.id
-    console.log(e.target.dataset.id)
-    fetch(`${listingsUrl}/${e.target.dataset.id}`)
-      .then(response => response.json())
-      .then(json => renderListing(json))
-  })
+  // listingUl.addEventListener('click', function(e){
+  //   //we need to render listing page with id of e.target.dataset.id
+  //   console.log(e.target.dataset.id)
+  //   fetch(`${listingsUrl}/${e.target.dataset.id}`)
+  //     .then(response => response.json())
+  //     .then(json => renderListing(json))
+  // })
 
 });
 
@@ -38,7 +38,7 @@ function renderListing(json){
 }
 
 function renderHomepage(json){
-  createListings(json)
+  createHTMLListings(json)
   //render any other elements that will be on the homepage
 }
 
@@ -53,4 +53,52 @@ function createListings(arrayOfListings){
     listingUl.appendChild(temp)
   })
 
+}
+
+
+function createHTMLListings(arrayOfListings){
+
+  //create an anchor tag
+
+
+  arrayOfListings.forEach(element => {
+    //create listing object
+    console.log(element);
+    var temp = document.createElement('a')
+    temp.class = "ui card"
+    let text = `<div class="content">
+      <div class="header">Old-Fashioned Tub</div>
+      <div class="meta">
+        <span class="category">Tubs</span>
+      </div>
+      <div class="description">
+        <p>A relaxing tub. Rub-a-dub.</p>
+      </div>
+    </div>
+    <div class="extra content">
+      <div class="right floated author">
+        <img class="ui avatar image" src="/images/avatar/small/matt.jpg" alt="host-id-pic"> Matt
+      </div>
+    </div>`
+    temp.innerHTML = text
+    let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
+    temp.setAttribute('data-id', newListing.id)
+    listingUl.appendChild(temp)
+  })
+//   `
+//   <div class="content">
+//     <div class="header">Old-Fashioned Tub</div>
+//     <div class="meta">
+//       <span class="category">Tubs</span>
+//     </div>
+//     <div class="description">
+//       <p>A relaxing tub. Rub-a-dub.</p>
+//     </div>
+//   </div>
+//   <div class="extra content">
+//     <div class="right floated author">
+//       <img class="ui avatar image" src="/images/avatar/small/matt.jpg" alt="host-id-pic"> Matt
+//     </div>
+//   </div>
+// `
 }
