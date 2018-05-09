@@ -5,55 +5,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
     <script type="text/javascript" src='src/index.js'></script>
     <script type="text/javascript" src='src/Listing.js'></script>
+    <script type="text/javascript" src='src/User.js'></script>
 </head>
+
 <div class="ui container">
 	<div class="ui borderless main menu">
 			<a class = "toc item">About</a>
 
 	<div class="right item">
-		<a class="ui button">Login</a> <!-- link to the modal for signin -->
-		<a class="ui button">Log out</a> <!-- link to delete the session, prompt to login afterwards -->
+		<a class="ui button" id='user-btn'>User</a> <!-- link to the modal for signin -->
+		<a class="ui button" id='login-btn'>Login</a> <!-- link to the modal for signin -->
+		<a class="ui button" id='logout-btn'>Log out</a> <!-- link to delete the session, prompt to login afterwards -->
 	</div>
 	</div>
 </div>
-<div class="ui text container" style="text-align:center; margin-top: 3em;">
+
+<div class="ui text container" style="text-align:center; margin-top: 3em;" id="index-text">
 	<h1>BookATub</h1>
 	<h2 style="color: gray;">For all your immediate relaxation needs...</h2>
 </div>
-<div class="ui container">
+
+<div class="ui container" id= "index-search">
 	<div class="ui category search" style="text-align: center; margin-top:3em;">
-  <div class="ui icon input">
-    <input class="prompt" type="text" placeholder="Search tubs..."><!-- search build out -->
-    <i class="search icon"></i>
-  </div>
-  <div class="results"></div>
-</div>
+	  <div class="ui icon input">
+	    <input class="prompt" type="text" placeholder="Search tubs..."><!-- search build out -->
+	    <i class="search icon"></i>
+	  </div>
+	  <div class="results"></div>
+	</div>
 </div>
 
-<div class="ui container" style="width: 65%; margin: 2em auto;">
+<div class="ui container" style="width: 65%; margin: 2em auto;" id="index-cards">
 	<div class="ui link cards" id = 'list-o-cards'>
 
 
-	<!-- <a class="ui card" href="#">
-  <div class="content">
-    <div class="header">Old-Fashioned Tub</div>
-    <div class="meta">
-      <span class="category">Tubs</span>
-    </div>
-    <div class="description">
-      <p>A relaxing tub. Rub-a-dub.</p>
-    </div>
-  </div>
-  <div class="extra content">
-    <div class="right floated author">
-      <img class="ui avatar image" src="/images/avatar/small/matt.jpg" alt="host-id-pic"> Matt
-    </div>
-  </div>
-</a> -->
-
-
-
-
-
-</div>
+	</div>
 </div>
