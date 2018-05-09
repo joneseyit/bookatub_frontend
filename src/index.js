@@ -3,102 +3,78 @@ const listingsUrl = `${baseUrl}listings`
 const reservationsUrl = `${baseUrl}reservations`
 const usersUrl = `${baseUrl}users`
 
-let currentListings
+let currentListings = []
 
-let listingList = document.getElementById('list-o-cards')
+let listingList
 
 document.addEventListener('DOMContentLoaded', () => {
   fetch(listingsUrl)
     .then(response => response.json())
     .then(json => renderHomepage(json))
 
-  // listingUl.addEventListener('click', function(e){
+
+  listingList = document.getElementById('list-o-cards')
+  // listingList.addEventListener('click', function(e){
   //   //we need to render listing page with id of e.target.dataset.id
-  //   console.log(e.target.dataset.id)
-  //   fetch(`${listingsUrl}/${e.target.dataset.id}`)
-  //     .then(response => response.json())
-  //     .then(json => renderListing(json))
+  //   console.log(e.target)
+  //   // fetch(`${listingsUrl}/${e.target.dataset.id}`)
+  //   //   .then(response => response.json())
+  //   //   .then(json => console.log(json))
+  //     // .then(json => renderListing(json))
   // })
 
 });
-
-function renderListing(json){
-  //render HTML to show single Listing info
-  //remove UL elements
-  listingUl.outerHTML = ""
-
-  //add elements needed for Listing(show)
-  var temp = document.createElement('h3')
-  temp.innerHTML = `Listing Name: ${json.name} Picture: ${json.picture} Description: ${json.description}`
-  document.body.appendChild(temp)
-  //add new
-  console.log(json, 'empty ul?')
-
-
-}
-
 function renderHomepage(json){
   createHTMLListings(json)
   //render any other elements that will be on the homepage
 }
 
-function createListings(arrayOfListings){
-
-  arrayOfListings.forEach(element => {
-    //create listing object
-    var temp = document.createElement('li')
-    temp.innerHTML = `Name: ${element.name} Photo: ${element.picture} Description: ${element.description}`
-    let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
-    temp.setAttribute('data-id', newListing.id)
-    listingUl.appendChild(temp)
-  })
+function handleListingClick(listingID){
+  var temp = currentListings.find(x => x.id == listingID)
+  console.log(temp)
+  //render listing show page
 
 }
+// function createListings(arrayOfListings){
+//
+//   arrayOfListings.forEach(element => {
+//     //create listing object
+//     var temp = document.createElement('li')
+//     temp.innerHTML = `Name: ${element.name} Photo: ${element.picture} Description: ${element.description}`
+//     let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
+//     temp.setAttribute('data-id', newListing.id)
+//     listingList.appendChild(temp)
+//   })
+//
+// }
 
 
 function createHTMLListings(arrayOfListings){
 
-  //create an anchor tag
-
-
   arrayOfListings.forEach(element => {
     //create listing object
-    console.log(element);
+    let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
+    currentListings.push(newListing)
     var temp = document.createElement('a')
-    temp.class = "ui card"
+    temp.setAttribute("class", "ui card");
     let text = `<div class="content">
-      <div class="header">Old-Fashioned Tub</div>
+      <div class="header">${element.name}</div>
       <div class="meta">
-        <span class="category">Tubs</span>
+        <span class="category">${element.location}</span>
       </div>
       <div class="description">
-        <p>A relaxing tub. Rub-a-dub.</p>
+        <p>${element.description}</p>
       </div>
     </div>
     <div class="extra content">
       <div class="right floated author">
-        <img class="ui avatar image" src="/images/avatar/small/matt.jpg" alt="host-id-pic"> Matt
+        <img class="ui avatar image" src="${element.picture}" alt="host-id-pic"> Host ID: ${element.host_id}
       </div>
     </div>`
     temp.innerHTML = text
-    let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
     temp.setAttribute('data-id', newListing.id)
-    listingUl.appendChild(temp)
+    temp.addEventListener('click', function(e){ handleListingClick(e.currentTarget.dataset.id)})
+    listingList.appendChild(temp)
   })
-//   `
-//   <div class="content">
-//     <div class="header">Old-Fashioned Tub</div>
-//     <div class="meta">
-//       <span class="category">Tubs</span>
-//     </div>
-//     <div class="description">
-//       <p>A relaxing tub. Rub-a-dub.</p>
-//     </div>
-//   </div>
-//   <div class="extra content">
-//     <div class="right floated author">
-//       <img class="ui avatar image" src="/images/avatar/small/matt.jpg" alt="host-id-pic"> Matt
-//     </div>
-//   </div>
-// `
+
 }
