@@ -5,38 +5,57 @@ const usersUrl = `${baseUrl}users`
 
 let currentlyLoggedIn = false
 let currentListings = []
+let allReservations = []
 let usersList = []
-let loggedInUser = 'Frank the Tank'
+let loggedInUser = ''
 let listingList
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetch(listingsUrl)
-    .then(response => response.json())
-    .then(json => renderHomepage(json))
   fetch(usersUrl)
     .then(response => response.json())
     .then(json => createUsers(json))
+    .then(fetch(reservationsUrl)
+      .then(response => response.json())
+      .then(json => createReservations(json)))
+    .then(fetch(listingsUrl)
+      .then(response => response.json())
+      .then(json => renderHomepage(json)))
 
+    // debugger;
   listingList = document.getElementById('list-o-cards')
   logInButton = document.getElementById('login-btn')
   userButton = document.getElementById('user-btn')
+  logOutButton = document.getElementById('logout-btn')
   logInButton.addEventListener('click', () => {
     handleLogInClick();
   })
+  logOutButton.addEventListener('click', () => {
+    loggedInUser = ''
+  })
   userButton.addEventListener('click', () => {
-    // handleLogInClick();
-    console.log(currentlyLoggedIn, loggedInUser)
-    debugger
+    removeElementsForListingShow()
+    renderUserShowPage()
+    // debugger;
   })
 
 });//end of DOMContentLoaded
 
+function createReservations(json)
+{
+  json.forEach(element => {
+    let newReservation = new Reservation(element.guest_id, element.listing_id, element.dateTime)
+    allReservations.push(newReservation)
+  })
+  // debugger;
+
+}
+
 function createUsers(json){
   json.forEach(element => {
-    // debugger;
     let newUser = new User(element.id, element.username, element.password, element.age, element.location)
     usersList.push(newUser)
   })
+  // debugger;
 }
 
 function renderHomepage(json){
@@ -44,32 +63,108 @@ function renderHomepage(json){
   createHTMLListings()
 }
 
+function renderUserShowPage(){
+  let thisUser = usersList.find(k=> k.username == loggedInUser)
+
+  newH1 = document.createElement('h1')
+  newH1.innerHTML = `${loggedInUser.charAt(0).toUpperCase() + loggedInUser.slice(1)}'s Page`
+  document.body.appendChild(newH1)
+
+  listingsHeader = document.createElement('h3')
+  listingsHeader.innerHTML = "Upcoming Listings"
+  document.body.appendChild(listingsHeader)
+
+
+  listingHolder = document.createElement('div')
+  listingHolder.setAttribute("class", "ui three column grid")
+  //get Listings
+  theseListings = currentListings.filter(l=> l.host_id == thisUser.id)
+  theseListings.forEach(element=>{
+    listingHolder.innerHTML += `<div class="column">
+    <div class="ui fluid card">
+      <div class="image">
+        <img src='${element.picture}'>
+      </div>
+      <div class="content">
+        <a class="header">'${element.name}'</a>
+      </div>
+    </div>
+  </div>`
+  })
+  document.body.appendChild(listingHolder)
+
+  //get Reservations
+
+
+  //create something to hold listings
+  //create something to hold reservations
+  reservationsHeader = document.createElement('h3')
+  reservationsHeader.innerHTML = "Upcoming Reservations"
+  document.body.appendChild(reservationsHeader)
+
+
+  reservationHolder = document.createElement('div')
+  reservationHolder.setAttribute("class", "ui three column grid")
+  //get Listings
+  theseReservations = allReservations.filter(l=> l.guest_id == thisUser.id)
+
+  theseReservations.forEach(element=>{
+    //get listing for reservation
+    thisListing = currentListings.find(l=> l.id == element.listing_id)
+    //get host
+    thisHost = usersList.find(l=> l.id == thisListing.host_id)
+    // debugger;
+    reservationHolder.innerHTML += `<div class="column">
+    <div class="ui fluid card">
+    <div class="image">
+
+    </div>
+    <div class="content">
+    <a class="header">'${thisHost.username}'</a>
+    </div>
+    </div>
+    </div>`
+  })
+  document.body.appendChild(reservationHolder)
+
+
+}
+
 function createListingsFromJson(json){
   json.forEach(element => {
-    //create listing object
-    let newListing = new Listing(element.id, element.host_id, element.name, element.picture, element.description, element.location)
+    let newListing = new Listing(element.id, element.host_id, element.name, `${element.picture}.jpg`, element.description, element.location)
     currentListings.push(newListing)
   })
 }
 
 function createListingElementAndAppend(singleListing){
-  var temp = document.createElement('a')
+
+  var temp = document.createElement('div')
   temp.setAttribute("class", "ui card");
-  let text = `<div class="content">
+  let text = `<div class="image">
+    <img src="${singleListing.picture}">
+  </div>
+  <div class="content">
     <div class="header">${singleListing.name}</div>
     <div class="meta">
-      <span class="category">${singleListing.location}</span>
+      <a>Friends</a>
     </div>
     <div class="description">
-      <p>${singleListing.description}</p>
+      ${singleListing.description}
     </div>
   </div>
   <div class="extra content">
-    <div class="right floated author">
-      <img class="ui avatar image" src="${singleListing.picture}" alt="host-id-pic"> Host ID: ${singleListing.host_id}
-    </div>
+    <span class="right floated">
+      ${singleListing.location}
+    </span>
+    <span>
+      <i class="user icon"></i>
+      ${usersList.find(k=> k.id == singleListing.host_id).username}
+    </span>
   </div>`
+
   temp.innerHTML = text
+  // // debugger;
   temp.setAttribute('data-id', singleListing.id)
   temp.addEventListener('click', function(e){ handleListingClick(e.currentTarget.dataset.id)})
   document.getElementById('list-o-cards').appendChild(temp)
@@ -101,7 +196,7 @@ function renderSignIn(){
   var text = `<form class="ui form">
     <div class="field">
       <label>Username</label>
-      <input type="text" name="first-name" placeholder="First Name">
+      <input type="text" name="first-name" placeholder="First Name" id='username-text'>
     </div>
     <button class="ui button" type="submit" id= "login-submit">Submit</button>
   </form>`
@@ -120,8 +215,9 @@ function renderSignIn(){
   document.body.appendChild(backButton)
   document.getElementById("login-submit").addEventListener('click', function(e) {
     e.preventDefault();
-    currentlyLoggedIn = !currentlyLoggedIn
-    console.log(currentlyLoggedIn)
+    loggedInUser = document.getElementById("username-text").value
+    // currentlyLoggedIn = !currentlyLoggedIn
+    // console.log(currentlyLoggedIn)
     handleBackFromSignIn()
   })
 }
@@ -131,6 +227,7 @@ function handleBackFromSignIn(){
   document.getElementById('back-btn').outerHTML = ""
   reRenderHome();
   createHTMLListings()
+  console.log(loggedInUser)
 }
 
 function handleListingClick(listingID){
@@ -170,7 +267,7 @@ function loadListingShowPage(listing){
           	$Price of the listing
           </div>
         </div>
-        <div class="ui bottom attached button">
+        <div class="ui bottom attached button" id= "book-reservation">
           <i class="add icon"></i>
           Book This Tub!
         </div>
@@ -183,9 +280,29 @@ function loadListingShowPage(listing){
   btn.innerHTML = 'Click to Go Home'
   btn.setAttribute("id", "home-button")
   btn.setAttribute("class", "ui button")
-  // btn.setAttribute("margin", "50%")
 
   document.body.appendChild(btn)
+  document.getElementById('book-reservation').addEventListener('click',function(e){
+    // console.log(e)
+    let thisUserId = usersList.find(k=> k.username == loggedInUser).id
+    let thisListingId = listing.id
+    // console.log(usersList.find(k=> k.username == loggedInUser).id)
+    // console.log(listing.id)
+    let newReservation = new Reservation(thisUserId, thisListingId, Date.now())
+    allReservations.push(newReservation)
+    fetch("http://localhost:3000/api/v1/reservations",{
+      method: 'POST',
+      body: JSON.stringify({
+        guest_id: thisUserId,
+        listing_id: thisListingId,
+        date_time: Date.now()
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+  })
 }
 
 function reRenderHome(){
