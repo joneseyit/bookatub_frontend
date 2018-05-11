@@ -25,42 +25,57 @@ document.addEventListener('DOMContentLoaded', () => {
   listingList = document.getElementById('list-o-cards')
   logInButton = document.getElementById('login-btn')
   userButton = document.getElementById('user-btn')
+  aboutButton = document.getElementById('about-btn')
   logOutButton = document.getElementById('logout-btn')
+  homeButton = document.getElementById('home-btn')
   logInButton.addEventListener('click', () => {
     handleLogInClick();
+  })
+  homeButton.addEventListener('click', () => {
+    deleteEntirePage();
+    showHomePage();
+    createHTMLListings()
+  })
+  aboutButton.addEventListener('click', () => {
+    handleAboutClick();
   })
   logOutButton.addEventListener('click', () => {
     loggedInUser = ''
   })
   userButton.addEventListener('click', () => {
-    removeElementsForListingShow()
+    // removeElementsForListingShow()
+    deleteEntirePage()
     renderUserShowPage()
     // debugger;
   })
 
 });//end of DOMContentLoaded
 
-function createReservations(json)
-{
+function createReservations(json){
   json.forEach(element => {
     let newReservation = new Reservation(element.guest_id, element.listing_id, element.dateTime)
     allReservations.push(newReservation)
   })
-  // debugger;
-
 }
-
 function createUsers(json){
   json.forEach(element => {
     let newUser = new User(element.id, element.username, element.password, element.age, element.location)
     usersList.push(newUser)
   })
-  // debugger;
 }
 
 function renderHomepage(json){
-  createListingsFromJson(json)
+  createListingsFromJson(json)//creates all Listing objects and stores them in currentListings
+  deleteEntirePage();
+  showHomePage();
   createHTMLListings()
+}
+
+function createListingsFromJson(json){
+  json.forEach(element => {
+    let newListing = new Listing(element.id, element.host_id, element.name, `${element.picture}.jpg`, element.description, element.location)
+    currentListings.push(newListing)
+  })
 }
 
 function renderUserShowPage(){
@@ -68,11 +83,11 @@ function renderUserShowPage(){
 
   newH1 = document.createElement('h1')
   newH1.innerHTML = `${loggedInUser.charAt(0).toUpperCase() + loggedInUser.slice(1)}'s Page`
-  document.body.appendChild(newH1)
+  document.getElementById('entire-page').appendChild(newH1)
 
   listingsHeader = document.createElement('h3')
   listingsHeader.innerHTML = "Upcoming Listings"
-  document.body.appendChild(listingsHeader)
+  document.getElementById('entire-page').appendChild(listingsHeader)
 
 
   listingHolder = document.createElement('div')
@@ -91,7 +106,7 @@ function renderUserShowPage(){
     </div>
   </div>`
   })
-  document.body.appendChild(listingHolder)
+  document.getElementById('entire-page').appendChild(listingHolder)
 
   //get Reservations
 
@@ -130,15 +145,13 @@ function renderUserShowPage(){
 
 }
 
-function createListingsFromJson(json){
-  json.forEach(element => {
-    let newListing = new Listing(element.id, element.host_id, element.name, `${element.picture}.jpg`, element.description, element.location)
-    currentListings.push(newListing)
+function createHTMLListings(){
+  currentListings.forEach(element => {
+    createListingElementAndAppend(element)
   })
 }
 
 function createListingElementAndAppend(singleListing){
-
   var temp = document.createElement('div')
   temp.setAttribute("class", "ui card");
   let text = `<div class="image">
@@ -164,75 +177,72 @@ function createListingElementAndAppend(singleListing){
   </div>`
 
   temp.innerHTML = text
-  // // debugger;
   temp.setAttribute('data-id', singleListing.id)
   temp.addEventListener('click', function(e){ handleListingClick(e.currentTarget.dataset.id)})
   document.getElementById('list-o-cards').appendChild(temp)
 }
 
-function createHTMLListings(){
-  currentListings.forEach(element => {
-    createListingElementAndAppend(element)
-  })
+function handleAboutClick(){
+  deleteEntirePage()
+  // console.log('About')
+  text = `<div class="ui text container" style="text-align:center; margin: 10em;" id="index-text">
+    <h1>About Book-a-Tub</h1>
+    <h2 style="color: gray;">Book-a-Tub is here to facilitate all of your tub needs.  Whether it's
+    a bath tub, hot tub, or even a swimming pool.  Book-a-Tub is here to help.</h2>
+  </div>`
+  document.getElementById('entire-page').innerHTML = text
 }
 
 function handleLogInClick(){
   //check to see what page we are coming from, handle accordingly
-  removeElementsForListingShow()
+  deleteEntirePage()
   renderSignIn()
 }
 
-function removeElementsForListingShow(){
-
-  let indexText = document.getElementById('index-text')
-  let indexCards = document.getElementById('index-cards')
-  let indexSearch = document.getElementById('index-search')
-  indexText.outerHTML = ""
-  indexCards.outerHTML = ""
-  indexSearch.outerHTML = ""
-}
 
 function renderSignIn(){
+
   var text = `<form class="ui form">
     <div class="field">
       <label>Username</label>
       <input type="text" name="first-name" placeholder="First Name" id='username-text'>
     </div>
     <button class="ui button" type="submit" id= "login-submit">Submit</button>
+    <button class="ui button" id= "back-btn">Cancel</button>
   </form>`
   let signEl = document.createElement('div')
   signEl.setAttribute("class", "ui text container")
   signEl.setAttribute("id", "login-form")
   signEl.setAttribute("style", "width:30%;margin: 2em auto;")
   signEl.innerHTML = text
-  document.body.appendChild(signEl)
-  let backButton = document.createElement('BUTTON')
-  backButton.innerHTML = "Cancel"
-  backButton.setAttribute("id", "back-btn")
-  backButton.addEventListener('click', function(){
+  document.getElementById('entire-page').appendChild(signEl)
+  document.getElementById('back-btn').addEventListener('click', function(e){
+    e.preventDefault
+    console.log('back')
     handleBackFromSignIn();
+
   })
-  document.body.appendChild(backButton)
+
   document.getElementById("login-submit").addEventListener('click', function(e) {
     e.preventDefault();
+
+    console.log('submit')
     loggedInUser = document.getElementById("username-text").value
-    // currentlyLoggedIn = !currentlyLoggedIn
-    // console.log(currentlyLoggedIn)
     handleBackFromSignIn()
   })
 }
 
 function handleBackFromSignIn(){
-  document.getElementById('login-form').outerHTML = ""
-  document.getElementById('back-btn').outerHTML = ""
-  reRenderHome();
+  deleteEntirePage();
+  // reRenderHome();
+  showHomePage();
   createHTMLListings()
   console.log(loggedInUser)
 }
 
 function handleListingClick(listingID){
   var temp = currentListings.find(x => x.id == listingID)
-  removeElementsForListingShow()
+  deleteEntirePage()
   loadListingShowPage(temp)
   var btn = document.getElementById('home-button')
   btn.addEventListener('click', function (){
@@ -241,14 +251,117 @@ function handleListingClick(listingID){
 }
 
 function removeListingLoadHome(){
-  document.getElementById('listing-card').outerHTML = ""
-  //button
-  document.getElementById('home-button').outerHTML = ""
-  reRenderHome();
+  deleteEntirePage();
+  showHomePage()
   createHTMLListings();
 }
 
 function loadListingShowPage(listing){
+  var temp = document.createElement('div')
+  temp.setAttribute("class", "ui container")
+  temp.setAttribute("id", "listing-card")
+  temp.setAttribute("style", "height: 50%; width: 80%;margin: 2em auto; padding-left: 2em;")
+  //<div class="ui container" style="height: 50%; width: 80%;margin: 2em auto; padding-left: 2em;">
+  let text = `
+    <div class="ui cards" align = "center">
+      <div class="card"   style="width:500px;height:700px;">
+        <div class="content" align = "center">
+        	<img src = "${listing.picture}" alt="PhotoOfTub" style="width:450px;height:450px;padding-bottom: 1em;	">
+          <div class="header">${listing.name}</div>
+          <div class="description">
+            ${listing.description}
+         </div>
+          <div class="description">
+          	$Price of the listing
+          </div>
+        </div>
+        <div class="ui bottom attached button" id= "book-reservation">
+          <i class="add icon"></i>
+          Book This Tub!
+        </div>
+      </div>
+    </div>
+  </div>`
+  temp.innerHTML = text
+  document.getElementById('entire-page').appendChild(temp)
+  // var btn = document.createElement('BUTTON')
+  // btn.innerHTML = 'Click to Go Home'
+  // btn.setAttribute("id", "home-button")
+  // btn.setAttribute("class", "ui button")
+  temp = document.createElement('div')
+  temp.setAttribute('id', 'back-button-div')
+  document.getElementById('entire-page').appendChild(temp)
+  document.getElementById('back-button-div').appendChild(btn)
+  document.getElementById('book-reservation').addEventListener('click',function(e){
+    // console.log(e)
+    let thisUserId = usersList.find(k=> k.username == loggedInUser).id
+    let thisListingId = listing.id
+    // console.log(usersList.find(k=> k.username == loggedInUser).id)
+    // console.log(listing.id)
+    let newReservation = new Reservation(thisUserId, thisListingId, Date.now())
+    allReservations.push(newReservation)
+    fetch("http://localhost:3000/api/v1/reservations",{
+      method: 'POST',
+      body: JSON.stringify({
+        guest_id: thisUserId,
+        listing_id: thisListingId,
+        date_time: Date.now()
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+  })
+}
+
+
+function deleteEntirePage(){
+  document.getElementById('entire-page').innerHTML = ''
+}
+
+function showHomePage(){
+
+  //index-text
+  let topText = document.createElement('div')
+  topText.setAttribute("class", "ui text container")
+  // topText.setAttribute("style", "text-align:center; margin-top: 3em;")
+  topText.setAttribute("id", "index-text")
+  topText.setAttribute("style", "text-align:center; margin-top: 3em;")
+  document.getElementById('entire-page').appendChild(topText)
+
+  //index-search
+  let searchBar = document.createElement('div')
+  searchBar.setAttribute("class", "ui container")
+  searchBar.setAttribute("id", "index-search")
+  var searchContainer = `<div class="ui category search" style="text-align: center; margin-top:3em;">
+  <div class="ui icon input">
+  <input class="prompt" type="text" placeholder="Search tubs..."><!-- search build out -->
+  <i class="search icon"></i>
+  </div>
+  <div class="results"></div>
+  </div>`
+  searchBar.innerHTML = searchContainer
+  document.getElementById('entire-page').appendChild(searchBar)
+
+  //index-cards
+  var textContainer = `<h1>BookATub</h1>
+    <h2 style="color: gray;">For all your immediate relaxation needs...</h2>`
+  //add list of cards container
+  topText.innerHTML = textContainer
+  let cards = document.createElement('div')
+  cards.setAttribute("class", "ui container")
+  cards.setAttribute("id", "index-cards")
+  cards.setAttribute("style", "width: 65%; margin: 2em auto")
+  var cardContainer = `<div class="ui link cards" id = 'list-o-cards'>
+    </div>`
+  cards.innerHTML = cardContainer
+  document.getElementById('entire-page').appendChild(cards)
+
+}
+
+function showLogin(){
+
   var temp = document.createElement('div')
   temp.setAttribute("class", "ui container")
   temp.setAttribute("id", "listing-card")
@@ -275,13 +388,13 @@ function loadListingShowPage(listing){
     </div>
   </div>`
   temp.innerHTML = text
-  document.body.appendChild(temp)
+  document.getElementById('entire-page').appendChild(temp)
   var btn = document.createElement('BUTTON')
   btn.innerHTML = 'Click to Go Home'
   btn.setAttribute("id", "home-button")
   btn.setAttribute("class", "ui button")
 
-  document.body.appendChild(btn)
+  document.getElementById('entire-page').appendChild(btn)
   document.getElementById('book-reservation').addEventListener('click',function(e){
     // console.log(e)
     let thisUserId = usersList.find(k=> k.username == loggedInUser).id
@@ -303,44 +416,6 @@ function loadListingShowPage(listing){
       }
     })
   })
-}
 
-function reRenderHome(){
-  //text Container
-  let topText = document.createElement('div')
-  topText.setAttribute("class", "ui text container")
-  // topText.setAttribute("style", "text-align:center; margin-top: 3em;")
-  topText.setAttribute("id", "index-text")
-  topText.setAttribute("style", "text-align:center; margin-top: 3em;")
-  document.body.appendChild(topText)
-  // //add search bar
 
-  let searchBar = document.createElement('div')
-  searchBar.setAttribute("class", "ui container")
-  searchBar.setAttribute("id", "index-search")
-  var searchContainer = `<div class="ui category search" style="text-align: center; margin-top:3em;">
-  <div class="ui icon input">
-  <input class="prompt" type="text" placeholder="Search tubs..."><!-- search build out -->
-  <i class="search icon"></i>
-  </div>
-  <div class="results"></div>
-  </div>`
-
-  searchBar.innerHTML = searchContainer
-  document.body.appendChild(searchBar)
-  //add text container
-  var textContainer = `<h1>BookATub</h1>
-    <h2 style="color: gray;">For all your immediate relaxation needs...</h2>`
-  //add list of cards container
-  topText.innerHTML = textContainer
-
-  // debugger;
-  let cards = document.createElement('div')
-  cards.setAttribute("class", "ui container")
-  cards.setAttribute("id", "index-cards")
-  cards.setAttribute("style", "width: 65%; margin: 2em auto")
-  var cardContainer = `<div class="ui link cards" id = 'list-o-cards'>
-    </div>`
-  cards.innerHTML = cardContainer
-  document.body.appendChild(cards)
 }
